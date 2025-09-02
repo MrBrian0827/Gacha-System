@@ -2,30 +2,25 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>🎴 多平台抽卡系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽卡系統</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1 id="title">抽卡系統</h1>
+  <h1>抽卡系統</h1>
 
-  <!-- 卡池選單 -->
-  <div>
-    <label for="poolSelect" id="pool-label">選擇卡池：</label>
-    <select id="poolSelect"></select>
+  <label for="poolSelect">選擇卡池:</label>
+  <select id="poolSelect">
+    <option value="">請選擇卡池</option>
+  </select>
+
+  <div class="buttons">
+    <button id="singleDraw">單抽</button>
+    <button id="tenDraw">十連抽</button>
   </div>
 
-  <!-- 抽卡按鈕 -->
-  <div>
-    <button id="singleDrawBtn">單抽</button>
-    <button id="tenDrawBtn">十連抽</button>
-    <button id="shareBtn">分享到 LINE</button>
-  </div>
+  <div id="results"></div>
 
-  <!-- 顯示抽卡結果 -->
-  <div id="counter">總抽數：0</div>
-  <div id="result"></div>
-  <div id="history"></div>
-
-  <script src="main.js"></script>
+  <script src="main.js" defer></script>
 </body>
 </html>

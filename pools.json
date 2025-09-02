@@ -1,64 +1,20 @@
 {
   "normal": {
     "name": "普通池",
-    "rates": [
-      { "rarity": "N", "rate": 0.6 },
-      { "rarity": "R", "rate": 0.25 },
-      { "rarity": "SR", "rate": 0.1 },
-      { "rarity": "SSR", "rate": 0.045 },
-      { "rarity": "UR", "rate": 0.005 }
-    ],
-    "cards": {
-      "N": [
-        {"name": "史萊姆", "image": "images/slime.png"},
-        {"name": "木劍", "image": "images/wood_sword.png"}
-      ],
-      "R": [
-        {"name": "青銅劍", "image": "images/bronze_sword.png"},
-        {"name": "見習法杖", "image": "images/apprentice_staff.png"}
-      ],
-      "SR": [
-        {"name": "火焰劍", "image": "images/flame_sword.png"},
-        {"name": "精靈弓", "image": "images/elf_bow.png"}
-      ],
-      "SSR": [
-        {"name": "聖騎士之盾", "image": "images/holy_shield.png"}
-      ],
-      "UR": [
-        {"name": "神聖之劍·勇者", "image": "images/holy_sword.png"}
-      ]
-    }
+    "cards": [
+      {"name":"勇者A","rarity":"N","skill":"無","effect":"","element":"火","description":"普通勇者","rate":0.6},
+      {"name":"勇者B","rarity":"R","skill":"火球","effect":"攻擊力+10%","element":"火","description":"強化勇者","rate":0.25},
+      {"name":"勇者C","rarity":"SR","skill":"火焰斬","effect":"攻擊力+50%","element":"火","description":"稀有勇者","rate":0.1},
+      {"name":"勇者D","rarity":"SSR","skill":"烈焰衝擊","effect":"攻擊力+100%","element":"火","description":"超稀有勇者","rate":0.045},
+      {"name":"勇者E","rarity":"UR","skill":"神之火","effect":"攻擊力+200%","element":"火","description":"終極勇者","rate":0.005}
+    ]
   },
   "limited": {
     "name": "限定池",
-    "rates": [
-      { "rarity": "N", "rate": 0.5 },
-      { "rarity": "R", "rate": 0.2 },
-      { "rarity": "SR", "rate": 0.15 },
-      { "rarity": "SSR", "rate": 0.12 },
-      { "rarity": "UR", "rate": 0.03 }
-    ],
-    "cards": {
-      "N": [
-        {"name": "小妖精", "image": "images/fairy.png"},
-        {"name": "舊短劍", "image": "images/old_sword.png"}
-      ],
-      "R": [
-        {"name": "暗影劍", "image": "images/shadow_sword.png"},
-        {"name": "水晶弓", "image": "images/crystal_bow.png"}
-      ],
-      "SR": [
-        {"name": "冰霜之劍", "image": "images/frost_sword.png"},
-        {"name": "幻影法袍", "image": "images/phantom_robe.png"}
-      ],
-      "SSR": [
-        {"name": "鳳凰羽翼", "image": "images/phoenix_wing.png"},
-        {"name": "墮天使之翼", "image": "images/fallen_wing.png"}
-      ],
-      "UR": [
-        {"name": "限定角色·月神", "image": "images/moon_god.png"},
-        {"name": "限定角色·太陽神", "image": "images/sun_god.png"}
-      ]
-    }
+    "cards": [
+      {"name":"限定勇者A","rarity":"SR","skill":"光之劍","effect":"攻擊力+60%","element":"光","description":"限定卡片","rate":0.5},
+      {"name":"限定勇者B","rarity":"SSR","skill":"光之盾","effect":"防禦+80%","element":"光","description":"限定卡片","rate":0.35},
+      {"name":"限定勇者C","rarity":"UR","skill":"光之天啟","effect":"攻擊+200%","element":"光","description":"限定卡片","rate":0.15}
+    ]
   }
 }
