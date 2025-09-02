@@ -1,12 +1,15 @@
+/* 基本版型 */
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
+  margin: 0;
   background-color: #f7f7f7;
 }
 
 h1 {
   text-align: center;
   color: #333;
+  margin-bottom: 20px;
 }
 
 label {
@@ -14,24 +17,34 @@ label {
   margin-right: 10px;
 }
 
-select {
-  padding: 5px 10px;
-  font-size: 16px;
-}
-
-.buttons {
+/* 下拉選單與按鈕容器 */
+.buttons, select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
   margin-top: 10px;
 }
 
+select {
+  padding: 10px;
+  font-size: 1rem;
+  min-width: 150px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  flex: 1 1 auto;
+}
+
+/* 按鈕自適應 */
 button {
-  padding: 10px 20px;
-  margin-right: 10px;
-  font-size: 16px;
+  padding: 12px 20px;
+  font-size: 1rem;
   cursor: pointer;
   border: none;
+  border-radius: 8px;
   background-color: #4CAF50;
   color: white;
-  border-radius: 5px;
+  flex: 1 1 120px; /* 最小寬度120px，會自動縮放 */
   transition: 0.2s;
 }
 
@@ -39,19 +52,56 @@ button:hover {
   background-color: #45a049;
 }
 
+/* 結果卡片區 */
 #results {
   margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
+/* 卡片共用樣式 */
 .card {
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
   padding: 10px;
   margin: 5px;
   width: 150px;
+  min-width: 120px;
   text-align: center;
-  border-radius: 5px;
+  border-radius: 10px;
   background-color: white;
-  box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  flex: 1 1 auto;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* 根據稀有度改變背景色 */
+.card[data-rarity="N"] {
+  background-color: #a0522d; /* 銅色 */
+  color: white;
+}
+
+.card[data-rarity="R"] {
+  background-color: #d3d3d3; /* 銀白色 */
+  color: #333;
+}
+
+.card[data-rarity="SR"] {
+  background-color: #ffd700; /* 金色 */
+  color: #333;
+}
+
+.card[data-rarity="SSR"] {
+  background-color: #ff4500; /* 紅色 */
+  color: white;
+}
+
+.card[data-rarity="UR"] {
+  background: linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet);
+  color: white;
 }

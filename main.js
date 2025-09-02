@@ -26,15 +26,16 @@ window.addEventListener("DOMContentLoaded", async () => {
     const rand = Math.random();
     let sum = 0;
     for (const card of pool.cards) {
-      sum += card.rate || 0; // 這裡假設 JSON 中每張卡有 rate
+      sum += card.rate || 0;
       if (rand <= sum) return card;
     }
-    return pool.cards[pool.cards.length - 1]; // 保底
+    return pool.cards[pool.cards.length - 1];
   }
 
   function showCard(card) {
     const div = document.createElement("div");
     div.className = "card";
+    div.setAttribute("data-rarity", card.rarity); // 用稀有度控制顏色
     div.innerHTML = `
       <strong>${card.name}</strong> (${card.rarity})<br>
       ${card.skill ? `技能: ${card.skill}<br>` : ''}
@@ -70,7 +71,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       cards.push(card);
     }
     if (!gotSRorAbove) {
-      // 找到最少稀有的 SR 或以上替換第一張
       const srCard = pool.cards.find(c => ["SR","SSR","UR"].includes(c.rarity));
       if (srCard) cards[0] = srCard;
     }
