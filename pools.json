@@ -1,0 +1,64 @@
+{
+  "normal": {
+    "name": "普通池",
+    "rates": [
+      { "rarity": "N", "rate": 0.6 },
+      { "rarity": "R", "rate": 0.25 },
+      { "rarity": "SR", "rate": 0.1 },
+      { "rarity": "SSR", "rate": 0.045 },
+      { "rarity": "UR", "rate": 0.005 }
+    ],
+    "cards": {
+      "N": [
+        {"name": "史萊姆", "image": "images/slime.png"},
+        {"name": "木劍", "image": "images/wood_sword.png"}
+      ],
+      "R": [
+        {"name": "青銅劍", "image": "images/bronze_sword.png"},
+        {"name": "見習法杖", "image": "images/apprentice_staff.png"}
+      ],
+      "SR": [
+        {"name": "火焰劍", "image": "images/flame_sword.png"},
+        {"name": "精靈弓", "image": "images/elf_bow.png"}
+      ],
+      "SSR": [
+        {"name": "聖騎士之盾", "image": "images/holy_shield.png"}
+      ],
+      "UR": [
+        {"name": "神聖之劍·勇者", "image": "images/holy_sword.png"}
+      ]
+    }
+  },
+  "limited": {
+    "name": "限定池",
+    "rates": [
+      { "rarity": "N", "rate": 0.5 },
+      { "rarity": "R", "rate": 0.2 },
+      { "rarity": "SR", "rate": 0.15 },
+      { "rarity": "SSR", "rate": 0.12 },
+      { "rarity": "UR", "rate": 0.03 }
+    ],
+    "cards": {
+      "N": [
+        {"name": "小妖精", "image": "images/fairy.png"},
+        {"name": "舊短劍", "image": "images/old_sword.png"}
+      ],
+      "R": [
+        {"name": "暗影劍", "image": "images/shadow_sword.png"},
+        {"name": "水晶弓", "image": "images/crystal_bow.png"}
+      ],
+      "SR": [
+        {"name": "冰霜之劍", "image": "images/frost_sword.png"},
+        {"name": "幻影法袍", "image": "images/phantom_robe.png"}
+      ],
+      "SSR": [
+        {"name": "鳳凰羽翼", "image": "images/phoenix_wing.png"},
+        {"name": "墮天使之翼", "image": "images/fallen_wing.png"}
+      ],
+      "UR": [
+        {"name": "限定角色·月神", "image": "images/moon_god.png"},
+        {"name": "限定角色·太陽神", "image": "images/sun_god.png"}
+      ]
+    }
+  }
+}

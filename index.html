@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>🎴 多平台抽卡系統</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 id="title">抽卡系統</h1>
+
+  <!-- 卡池選單 -->
+  <div>
+    <label for="poolSelect" id="pool-label">選擇卡池：</label>
+    <select id="poolSelect"></select>
+  </div>
+
+  <!-- 抽卡按鈕 -->
+  <div>
+    <button id="singleDrawBtn">單抽</button>
+    <button id="tenDrawBtn">十連抽</button>
+    <button id="shareBtn">分享到 LINE</button>
+  </div>
+
+  <!-- 顯示抽卡結果 -->
+  <div id="counter">總抽數：0</div>
+  <div id="result"></div>
+  <div id="history"></div>
+
+  <script src="main.js"></script>
+</body>
+</html>
