@@ -1,4 +1,4 @@
-/* 基本版型 */
+/* 基本樣式 */
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
@@ -44,7 +44,7 @@ button {
   border-radius: 8px;
   background-color: #4CAF50;
   color: white;
-  flex: 1 1 120px; /* 最小寬度120px，會自動縮放 */
+  flex: 1 1 120px;
   transition: 0.2s;
 }
 
@@ -102,6 +102,32 @@ button:hover {
 }
 
 .card[data-rarity="UR"] {
-  background: linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet);
+  background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+  background-size: 1400% 1400%;
   color: white;
+}
+
+/* 特效動畫 */
+@keyframes flash {
+  0% { box-shadow: 0 0 10px yellow; transform: scale(1); }
+  50% { box-shadow: 0 0 20px yellow; transform: scale(1.1); }
+  100% { box-shadow: 0 0 10px yellow; transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* SSR 特效 */
+.card.ssr {
+  animation: flash 1s ease-in-out 0s 2;
+  border: 3px solid #ff4500; /* 加粗紅色邊框 */
+}
+
+/* UR 特效 */
+.card.ur {
+  animation: flash 1s ease-in-out 0s 4, glow 5s ease infinite;
+  border: 3px solid #fff;
 }

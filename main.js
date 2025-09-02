@@ -35,7 +35,12 @@ window.addEventListener("DOMContentLoaded", async () => {
   function showCard(card) {
     const div = document.createElement("div");
     div.className = "card";
-    div.setAttribute("data-rarity", card.rarity); // 用稀有度控制顏色
+    div.setAttribute("data-rarity", card.rarity);
+
+    // 加入動畫類別
+    if (card.rarity === "SSR") div.classList.add("ssr");
+    if (card.rarity === "UR") div.classList.add("ur");
+
     div.innerHTML = `
       <strong>${card.name}</strong> (${card.rarity})<br>
       ${card.skill ? `技能: ${card.skill}<br>` : ''}
@@ -44,6 +49,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       ${card.description ? `${card.description}` : ''}
     `;
     resultsDiv.appendChild(div);
+
+    // 動畫結束後移除類別
+    setTimeout(() => {
+      div.classList.remove("ssr", "ur");
+    }, 4000);
   }
 
   // 單抽
