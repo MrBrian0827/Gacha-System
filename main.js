@@ -88,32 +88,27 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   // 卡片渲染：名稱左上、圖片中、效果在圖下、左下ATK/右下HP
-  function showCard(card, delay = 0) {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.setAttribute("data-rarity", card.rarity);
-    if (card.rarity === "SSR") div.classList.add("ssr");
-    if (card.rarity === "UR")  div.classList.add("ur");
+function showCard(card, delay=0) {
+  const div = document.createElement("div");
+  div.className = "card fly-in";
+  div.setAttribute("data-rarity", card.rarity);
+  if (card.rarity === "SSR") div.classList.add("ssr");
+  if (card.rarity === "UR") div.classList.add("ur");
 
-    const imgUrl = card.image || PLACEHOLDER_IMG;
-    const effectText = card.effect || "（無效果說明）";
-    const atk = (typeof card.atk === "number") ? card.atk : Math.floor(50 + Math.random()*300);
-    const hp  = (typeof card.hp  === "number") ? card.hp  : Math.floor(200 + Math.random()*800);
+  div.innerHTML = `
+    <div class="name">${card.name} (${card.rarity})</div>
+    <div class="image">
+      <img src="default.png" alt="${card.name}">
+    </div>
+    <div class="effect">${card.effect || "效果描述..."}</div>
+    <div class="atk">ATK: ${card.attack || Math.floor(Math.random()*200+50)}</div>
+    <div class="hp">HP: ${card.hp || Math.floor(Math.random()*1000+200)}</div>
+  `;
 
-    div.innerHTML = `
-      <div class="name">${card.name} (${card.rarity})</div>
-      <div class="image-wrap">
-        <img src="${imgUrl}" alt="${card.name}">
-      </div>
-      <div class="effect">${effectText}</div>
-      <div class="stats">
-        <div class="atk">ATK ${atk}</div>
-        <div class="hp">HP ${hp}</div>
-      </div>
-    `;
+  setTimeout(() => resultsDiv.appendChild(div), delay);
+  setTimeout(() => div.classList.remove("ssr","ur"), 4000 + delay);
+}
 
-    setTimeout(() => resultsDiv.appendChild(div), delay);
-  }
 
   document.getElementById("singleDraw").addEventListener("click", () => {
     resultsDiv.innerHTML = "";
