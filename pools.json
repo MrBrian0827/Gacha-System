@@ -54,7 +54,7 @@
   {"name":"N勇者47","rarity":"N","attack":20,"hp":51,"image":"default.png","effect":"受到治療效果+8%","rate":0},
   {"name":"N勇者48","rarity":"N","attack":18,"hp":58,"image":"default.png","effect":"攻擊命中率+3%","rate":0},
   {"name":"N勇者49","rarity":"N","attack":22,"hp":46,"image":"default.png","effect":"對精英怪傷害+5%","rate":0},
-  {"name":"N勇者50","rarity":"N","attack":15,"hp":65,"image":"default.png","effect":"受到傷害-2%","rate":0}
+  {"name":"N勇者50","rarity":"N","attack":15,"hp":65,"image":"default.png","effect":"受到傷害-2%","rate":0},
 
 
   {"name":"R勇者1","rarity":"R","attack":35,"hp":90,"image":"default.png","effect":"攻擊力+10%","rate":0},
