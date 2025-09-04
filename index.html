@@ -1,29 +1,29 @@
+<!-- main.html 範例 -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>抽卡系統</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抽卡系統</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>抽卡系統</h1>
+<h1>抽卡系統</h1>
 
-  <div class="controls">
-    <label for="poolSelect">選擇卡池:</label>
-    <select id="poolSelect">
-      <option value="">請選擇卡池</option>
-    </select>
-  </div>
-
+<div class="controls">
+  <label for="poolSelect">卡池:</label>
+  <select id="poolSelect">
+    <option value="">-- 請選擇卡池 --</option>
+  </select>
   <div class="buttons">
     <button id="singleDraw">單抽</button>
     <button id="tenDraw">十連抽</button>
-    <button id="clear">清空結果</button>
+    <button id="clear">清除結果</button>
   </div>
+</div>
 
-  <div id="results"></div>
+<div id="results"></div>
 
-  <script src="main.js" defer></script>
+<script src="main.js"></script>
 </body>
 </html>
