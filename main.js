@@ -87,28 +87,31 @@ window.addEventListener("DOMContentLoaded", async () => {
     return bucket[Math.floor(Math.random() * bucket.length)];
   }
 
-  // 卡片渲染：名稱左上、圖片中、效果在圖下、左下ATK/右下HP
-function showCard(card, delay=0) {
+// 卡片渲染：名稱左上、圖片中、效果在圖下、左下ATK/右下HP、右上稀有度
+function showCard(card, delay = 0) {
   const div = document.createElement("div");
   div.className = "card fly-in";
   div.setAttribute("data-rarity", card.rarity);
+
+  // 依稀有度加特效 class
   if (card.rarity === "SSR") div.classList.add("ssr");
   if (card.rarity === "UR") div.classList.add("ur");
 
+  // 卡片內容
   div.innerHTML = `
-    <div class="name">${card.name} (${card.rarity})</div>
+    <div class="name">${card.name}</div>
+    <div class="rarity ${card.rarity}">${card.rarity}</div> <!-- 右上角稀有度 -->
     <div class="image">
-      <img src="default.png" alt="${card.name}">
+      <img src="${card.image || PLACEHOLDER_IMG}" alt="${card.name}">
     </div>
     <div class="effect">${card.effect || "效果描述..."}</div>
-    <div class="atk">ATK: ${card.attack || Math.floor(Math.random()*200+50)}</div>
-    <div class="hp">HP: ${card.hp || Math.floor(Math.random()*1000+200)}</div>
+    <div class="atk">ATK: ${card.attack || Math.floor(Math.random() * 200 + 50)}</div>
+    <div class="hp">HP: ${card.hp || Math.floor(Math.random() * 1000 + 200)}</div>
   `;
 
   setTimeout(() => resultsDiv.appendChild(div), delay);
-  setTimeout(() => div.classList.remove("ssr","ur"), 4000 + delay);
+  setTimeout(() => div.classList.remove("ssr", "ur"), 4000 + delay);
 }
-
 
   document.getElementById("singleDraw").addEventListener("click", () => {
     resultsDiv.innerHTML = "";

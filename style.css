@@ -1,147 +1,189 @@
-/* 基本樣式 */
-* { box-sizing: border-box; }
+/* =======================
+   全局樣式
+======================= */
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", Arial, sans-serif;
-  padding: 20px;
-  margin: 0;
-  background: #0f1115;
-  color: #e9ecef;
+  font-family: Arial, sans-serif; /* 主字體 */
+  padding: 20px;                  /* 內距 */
+  margin: 0;                       /* 去掉預設 margin */
+  background-color: #f7f7f7;       /* 頁面背景色 */
 }
+
 h1 {
-  text-align: center;
-  margin: 10px 0 16px;
-  letter-spacing: 1px;
+  text-align: center;              /* 標題置中 */
+  color: #333;                     /* 字體顏色 */
+  margin-bottom: 20px;             /* 下方間距 */
 }
 
-/* 控制列 */
-.controls {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
+label {
+  font-weight: bold;               /* 標籤字體加粗 */
+  margin-right: 10px;              /* 右側間距 */
 }
-label { font-weight: 600; }
+
+/* =======================
+   下拉選單與按鈕容器
+======================= */
+.buttons, select {
+  display: flex;                   /* 水平排列 */
+  flex-wrap: wrap;                 /* 換行 */
+  gap: 10px;                       /* 間距 */
+  justify-content: center;         /* 置中對齊 */
+  margin-top: 10px;                /* 上方間距 */
+}
+
 select {
-  padding: 10px 12px;
-  min-width: 180px;
-  font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid #2a2f3a;
-  background: #151821;
-  color: #e9ecef;
+  padding: 10px;                   /* 內距 */
+  font-size: 1rem;                 /* 字體大小 */
+  min-width: 150px;                /* 最小寬度 */
+  border-radius: 5px;              /* 邊框圓角 */
+  border: 1px solid #ccc;          /* 邊框顏色 */
+  flex: 1 1 auto;                  /* 自動伸縮 */
 }
 
-/* 按鈕群：自適應 */
-.buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
 button {
-  flex: 1 1 160px;
-  max-width: 220px;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(180deg,#2a6efc,#1a4fd6);
-  color: white;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 18px rgba(42,110,252,.35);
-  transition: transform .12s ease, filter .12s ease;
+  padding: 12px 20px;              /* 內距 */
+  font-size: 1rem;                 /* 字體大小 */
+  cursor: pointer;                 /* 滑鼠變手形 */
+  border: none;                    /* 去掉邊框 */
+  border-radius: 8px;              /* 圓角 */
+  background-color: #4CAF50;       /* 綠色背景 */
+  color: white;                    /* 白字 */
+  flex: 1 1 120px;                 /* 按鈕彈性大小 */
+  transition: 0.2s;                /* 滑鼠懸停動畫 */
 }
-button:hover { transform: translateY(-1px); filter: brightness(1.05); }
-button:active { transform: translateY(0); filter: brightness(.95); }
-#clear { background: linear-gradient(180deg,#555,#3a3a3a); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
 
-/* 抽出結果區 */
+button:hover {
+  background-color: #45a049;       /* 懸停變色 */
+}
+
+/* =======================
+   抽卡結果區
+======================= */
 #results {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
-  align-items: stretch;
+  margin-top: 20px;                /* 上方間距 */
+  display: flex;                    /* 卡片水平排列 */
+  flex-wrap: wrap;                  /* 換行 */
+  justify-content: center;          /* 置中對齊 */
+  gap: 10px;                        /* 卡片間距 */
 }
 
-/* 卡片外觀與版面（名稱左上、圖片中、效果在圖下、攻擊左下、血量右下） */
+/* =======================
+   卡片樣式
+======================= */
 .card {
-  position: relative;
-  width: 180px;
-  height: 250px;
-  border-radius: 12px;
-  overflow: hidden;
-  background-color: white;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
+  position: relative;              /* 方便定位內部元素 */
+  border: 2px solid #ccc;          /* 卡片邊框 */
+  padding: 10px;                   /* 內距 */
+  margin: 5px;                     /* 外距 */
+  width: 150px;                     /* 卡片固定寬度 */
+  min-width: 120px;                 /* 最小寬度 */
+  text-align: center;               /* 文字置中 */
+  border-radius: 10px;              /* 卡片圓角 */
+  background-color: white;          /* 卡片背景 */
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1); /* 陰影 */
+  flex: 1 1 auto;                   /* 自動伸縮 */
+  transition: transform 0.2s;       /* 放大動畫 */
+}
+
+.card:hover {
+  transform: scale(1.05);           /* 滑鼠懸停放大 */
+}
+
+/* =======================
+   卡片元素定位
+======================= */
+.card .name {
+  position: absolute;
+  top: 5px;                        /* 左上角 */
+  left: 5px;
+  font-weight: bold;
   font-size: 0.9rem;
 }
 
-/* 卡片名稱：左上角 */
-.card .name {
+.card .rarity {
   position: absolute;
-  top: 5px;
-  left: 8px;
+  top: 5px;                        /* 右上角 */
+  right: 5px;
   font-weight: bold;
-  font-size: 1rem;
-  color: #000;
-}
-
-/* 卡片圖片：中間 */
-.card .image {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card .image img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover;
-}
-
-/* 效果文字：圖片下方 */
-.card .effect {
-  text-align: center;
   font-size: 0.8rem;
-  padding: 4px;
-  border-top: 1px solid #ccc;
-  background: rgba(255,255,255,0.7);
-  min-height: 40px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: white;
 }
 
-/* 攻擊與血量：左下 / 右下 */
+.card .rarity.N { background-color: #a0522d; }    /* 棕色 */
+.card .rarity.R { background-color: #d3d3d3; color:#333; } /* 淺灰 */
+.card .rarity.SR { background-color: #ffd700; color:#333; } /* 金色 */
+.card .rarity.SSR { background-color: #ff4500; }  /* 橘紅 */
+.card .rarity.UR {
+  background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+  background-size: 1400% 1400%;
+}
+
+/* 卡片中間圖片 */
+.card .image img {
+  width: 100%;                     /* 滿寬 */
+  height: auto;
+  margin-top: 20px;                /* 與名稱保持距離 */
+  border-radius: 6px;
+}
+
+/* 效果欄位 */
+.card .effect {
+  font-size: 0.8rem;
+  margin: 5px 0;
+  padding: 4px 6px;
+  min-height: 40px;
+  max-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 限制最多兩行 */
+  -webkit-box-orient: vertical;
+  word-wrap: break-word;
+
+  background-color: rgba(240, 240, 240, 0.8); /* 淡灰色背景 */
+  border-radius: 4px;
+  color: #333; /* 文字顏色 */
+}
+
+/* 左下攻擊 / 右下血量 */
 .card .atk {
   position: absolute;
   bottom: 5px;
-  left: 8px;
+  left: 5px;
+  font-size: 0.75rem;
   font-weight: bold;
-  color: #e63946;
 }
+
 .card .hp {
   position: absolute;
   bottom: 5px;
-  right: 8px;
+  right: 5px;
+  font-size: 0.75rem;
   font-weight: bold;
-  color: #1d3557;
 }
 
-
-/* 動畫 */
-@keyframes flyIn {
-  from { transform: translateY(16px) scale(.98); opacity: 0; }
-  to   { transform: translateY(0) scale(1); opacity: 1; }
+/* =======================
+   稀有度特殊動畫
+======================= */
+@keyframes flash {
+  0% { box-shadow: 0 0 10px yellow; transform: scale(1); }
+  50% { box-shadow: 0 0 20px yellow; transform: scale(1.1); }
+  100% { box-shadow: 0 0 10px yellow; transform: scale(1); }
 }
+
 @keyframes glow {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* 更華麗的 SSR / UR 閃爍框 */
-.card.ssr { box-shadow: 0 0 0 2px rgba(255,80,80,.8), 0 0 24px rgba(255,80,80,.5); }
-.card.ur  { box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 0 28px rgba(255,255,255,.7); }
+@keyframes flyIn {
+  0% { transform: translateY(100%) rotate(-15deg) scale(0.5); opacity: 0; }
+  50% { transform: translateY(-10%) rotate(5deg) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0%) rotate(0deg) scale(1); opacity: 1; }
+}
+
+.card.fly-in { animation: flyIn 0.8s ease forwards; }
+.card.ssr { animation: flash 1s ease-in-out 0s 2; border: 3px solid #ff4500; }
+.card.ur { animation: flash 1s ease-in-out 0s 4, glow 5s ease infinite; border: 3px solid #fff; }
