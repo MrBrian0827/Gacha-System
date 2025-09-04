@@ -85,7 +85,7 @@
   {"name":"R勇者22","rarity":"R","attack":32,"hp":115,"image":"default.png","effect":"受到治療效果+20%","rate":0},
   {"name":"R勇者23","rarity":"R","attack":48,"hp":81,"image":"default.png","effect":"光屬性攻擊+10%","rate":0},
   {"name":"R勇者24","rarity":"R","attack":36,"hp":105,"image":"default.png","effect":"行動速度+3","rate":0},
-  {"name":"R勇者25","rarity":"R","attack":54,"hp":73,"image":"default.png","effect":"攻擊時5%機率使敵人暈眩","rate":0}
+  {"name":"R勇者25","rarity":"R","attack":54,"hp":73,"image":"default.png","effect":"攻擊時5%機率使敵人暈眩","rate":0},
 
 
   {"name":"SR勇者1","rarity":"SR","attack":75,"hp":130,"image":"default.png","effect":"技能傷害+15%","rate":0},
