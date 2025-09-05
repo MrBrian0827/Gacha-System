@@ -1,153 +1,120 @@
-/* style.css */
+/* ======================
+   App 風格基礎
+====================== */
 body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f7f7f7;
+  font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+  background: #f0f2f5;
   margin: 0;
-}
-
-h1 {
-  text-align: center;
+  padding: 0;
   color: #333;
+}
+
+.app-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.app-title {
+  text-align: center;
   margin-bottom: 20px;
+  color: #2c3e50;
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+/* 卡片 UI */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: 10px;
+  position: relative;
+  transition: transform 0.2s ease;
 }
 
-select {
-  padding: 10px;
+.card:hover {
+  transform: scale(1.03);
+}
+
+.rarity-label {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* 稀有度顏色 */
+.rarity-label.N { color: #a0522d; }
+.rarity-label.R { color: #808080; }
+.rarity-label.SR { color: #ffd700; }
+.rarity-label.SSR { color: #ff4500; }
+.rarity-label.UR { 
+  background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 選單和按鈕 */
+select, button {
+  width: 100%;
+  padding: 12px;
   font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  min-width: 180px;
+  border-radius: 12px;
+  border: none;
+  margin-top: 8px;
+}
+
+button {
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #45a049;
+}
+
+button.secondary {
+  background: #ddd;
+  color: #333;
+}
+
+button.secondary:hover {
+  background: #ccc;
 }
 
 .buttons {
   display: flex;
   gap: 10px;
-  margin-top: 5px;
+  flex-wrap: wrap;
+  margin-top: 15px;
 }
 
-button {
-  padding: 12px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  background-color: #4CAF50;
-  color: white;
-  transition: 0.2s;
-}
-
-button:hover { background-color: #45a049; }
-
-#results {
+.results {
   margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
 }
 
-/* ===== 卡片 ===== */
-.card {
-  position: relative;
-  border: 2px solid #ccc;
-  width: 150px;
-  text-align: center;
-  border-radius: 10px;
-  background-color: white;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-  padding: 10px;
-  transition: transform 0.2s;
-}
-
-.card:hover { transform: scale(1.05); }
-
-/* 名稱左上 */
-.card .name {
-  position: absolute;
-  top: 5px;
-  left: 8px;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-/* 稀有度右上 */
-.card .rarity {
-  position: absolute;
-  top: 5px;
-  right: 8px;
-  font-weight: bold;
-  font-size: 0.85rem;
-  padding: 2px 5px;
-  border-radius: 4px;
-  color: white;
-}
-
-.card .rarity.N { background-color: #a0522d; }
-.card .rarity.R { background-color: #d3d3d3; color: #333; }
-.card .rarity.SR { background-color: #ffd700; color: #333; }
-.card .rarity.SSR { background-color: #ff4500; animation: flash 1s ease-in-out 0s 2; }
-.card .rarity.UR {
-  background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
-  background-size: 1400% 1400%;
-  animation: glow 5s ease infinite;
-}
-
-/* 中間圖片 */
-.card .image img {
-  width: 100%;
-  border-radius: 5px;
-  margin-top: 20px;
-}
-
-/* 效果欄位 */
-.card .effect {
-  margin-top: 5px;
-  font-size: 0.8rem;
-  min-height: 25px;
-}
-
-/* 左下攻擊、右下血量 */
-.card .atk {
-  position: absolute;
-  bottom: 5px;
-  left: 8px;
-  font-weight: bold;
-  font-size: 0.8rem;
-}
-
-.card .hp {
-  position: absolute;
-  bottom: 5px;
-  right: 8px;
-  font-weight: bold;
-  font-size: 0.8rem;
-}
-
-/* ===== 動畫 ===== */
-@keyframes flash {
-  0% { box-shadow: 0 0 10px yellow; transform: scale(1); }
-  50% { box-shadow: 0 0 20px yellow; transform: scale(1.1); }
-  100% { box-shadow: 0 0 10px yellow; transform: scale(1); }
-}
-
-@keyframes glow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* 動畫 */
+.fly-in {
+  animation: flyIn 0.5s ease forwards;
 }
 
 @keyframes flyIn {
-  0% { transform: translateY(100%) rotate(-15deg) scale(0.5); opacity: 0; }
-  50% { transform: translateY(-10%) rotate(5deg) scale(1.05); opacity: 1; }
-  100% { transform: translateY(0%) rotate(0deg) scale(1); opacity: 1; }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.card.fly-in { animation: flyIn 0.8s ease forwards; }
+/* 手機響應式 */
+@media (max-width: 600px) {
+  .buttons {
+    flex-direction: column;
+  }
+  button {
+    flex: 1 1 auto;
+  }
+}

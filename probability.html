@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽卡機率表</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>抽卡機率表</h1>
+
+    <div id="probabilityContainer" class="probability-table"></div>
+
+    <div class="buttons">
+      <button class="secondary" onclick="location.href='index.html'">返回抽卡頁面</button>
+    </div>
+  </div>
+
+  <script>
+    async function loadProbabilities() {
+      try {
+        const res = await fetch("./pools.json");
+        const poolsData = await res.json();
+
+        const container = document.getElementById("probabilityContainer");
+        container.innerHTML = "";
+
+        Object.keys(poolsData).forEach(poolKey => {
+          const pool = poolsData[poolKey];
+
+          // 卡池標題
+          const title = document.createElement("h2");
+          title.textContent = pool.name;
+          container.appendChild(title);
+
+          // 機率表格
+          const table = document.createElement("table");
+          table.className = "probability";
+
+          const thead = document.createElement("thead");
+          thead.innerHTML = `
+            <tr>
+              <th>名稱</th>
+              <th>稀有度</th>
+              <th>機率</th>
+            </tr>
+          `;
+          table.appendChild(thead);
+
+          const tbody = document.createElement("tbody");
+          pool.cards.forEach(card => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${card.name}</td>
+              <td class="rarity ${card.rarity}">${card.rarity}</td>
+              <td>${(card.rate * 100).toFixed(2)}%</td>
+            `;
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+
+          container.appendChild(table);
+        });
+      } catch (err) {
+        console.error("載入失敗:", err);
+        document.getElementById("probabilityContainer").innerHTML = "<p>無法載入機率表</p>";
+      }
+    }
+
+    loadProbabilities();
+  </script>
+</body>
+</html>
