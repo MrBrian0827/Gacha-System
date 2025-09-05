@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽卡系統</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+
+    <h1>抽卡系統 Demo</h1>
+
+    <!-- 顯示目前第幾抽 -->
+    <div id="drawCount" style="margin-bottom:10px;">目前第 0 抽</div>
+
+    <!-- 抽卡按鈕 -->
+    <div class="buttons">
+      <button id="btnSingle">單抽</button>
+      <button id="btnMulti">十連抽</button>
+      <button id="btnRates">抽卡機率</button>
+      <button id="btnHistory">抽卡紀錄</button>
+      <button id="btnClearHistory">清空紀錄</button>
+    </div>
+
+    <!-- 抽卡結果區 -->
+    <div id="results" class="results"></div>
+
+    <!-- 抽卡紀錄 modal -->
+    <div id="historyModal" class="modal">
+      <div class="modal-content">
+        <h2>抽卡紀錄</h2>
+        <div id="history" class="results"></div>
+        <button class="close-btn">關閉</button>
+      </div>
+    </div>
+
+    <!-- 抽卡機率 modal -->
+    <div id="rateModal" class="modal">
+      <div class="modal-content">
+        <h2>卡池機率</h2>
+        <ul>
+          <li>N 卡：剩餘機率</li>
+          <li>R 卡：30%</li>
+          <li>SR 卡：4.93%</li>
+          <li>SSR 卡：0.05%</li>
+          <li>UR 卡：0.02%</li>
+        </ul>
+        <button class="close-btn">關閉</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 卡片資料 -->
+  <script src="cards.js"></script>
+  <!-- 抽卡邏輯 -->
+  <script src="script.js"></script>
+</body>
+</html>
