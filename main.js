@@ -1,4 +1,4 @@
-// ====== 稀有度機率設定（總和需為 1）======
+// ====== 機率設定（總和需為 1）======
 const rarityRates = {
   N: 0.5551666667,
   R: 0.2775833333,
@@ -8,9 +8,9 @@ const rarityRates = {
 };
 // ===================================
 
-// 卡片背面圖片設定（可自行替換）
-const CARD_BACK_IMG = "card_back.png"; // 這裡換成你設計的背面圖片
-const PLACEHOLDER_IMG = "default.png";
+// 卡片圖片與卡背
+const PLACEHOLDER_IMG = "https://via.placeholder.com/600x380.png?text=Card+Image";
+const CARD_BACK_IMG = "https://via.placeholder.com/600x380.png?text=Card+Back"; // 可自行替換
 
 window.addEventListener("DOMContentLoaded", async () => {
   let poolsRaw = null;
@@ -24,7 +24,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // 將 sharedNRSCards 合併進各池（有 inheritShared: true 才合併）
+  // 將 sharedNRSCards 合併進各池
   const poolsData = {};
   for (const key of Object.keys(poolsRaw)) {
     if (key === "sharedNRSCards") continue;
@@ -58,20 +58,23 @@ window.addEventListener("DOMContentLoaded", async () => {
   function pickRarity() {
     const rand = Math.random();
     let acc = 0;
-    for (const rarity of ["N","R","SR","SSR","UR"]) {
+    const rarities = ["N","R","SR","SSR","UR"]; // 從低到高
+    for (const rarity of rarities) {
       acc += rarityRates[rarity] || 0;
-      if (rand <= acc) return rarity;
+      if (rand < acc) return rarity;
     }
-    return "N"; // fallback
+    return "N";
   }
 
   function drawCard(pool) {
     const rarity = pickRarity();
+
     const grouped = {};
     pool.cards.forEach(c => {
       if (!grouped[c.rarity]) grouped[c.rarity] = [];
       grouped[c.rarity].push(c);
     });
+
     const order = ["UR","SSR","SR","R","N"];
     let idx = order.indexOf(rarity);
     while (idx < order.length && (!grouped[order[idx]] || grouped[order[idx]].length === 0)) {
@@ -81,45 +84,38 @@ window.addEventListener("DOMContentLoaded", async () => {
     return bucket[Math.floor(Math.random() * bucket.length)];
   }
 
-  // 生成卡片 DOM（背面先顯示）
+  // 卡片渲染：名稱左上、圖片中、效果在圖下、左下ATK/右下HP、右上稀有度，支持翻面
   function showCard(card, delay=0) {
     const div = document.createElement("div");
-    div.className = "card fly-in flip-card";
+    div.className = "card fly-in";
     div.setAttribute("data-rarity", card.rarity);
-    if (card.rarity === "SSR") div.classList.add("ssr");
-    if (card.rarity === "UR") div.classList.add("ur");
-
     div.innerHTML = `
-      <div class="flip-card-inner">
-        <div class="flip-card-front">
-          <img src="${CARD_BACK_IMG}" alt="Card Back">
-        </div>
-        <div class="flip-card-back">
-          <div class="name">${card.name}</div>
-          <div class="rarity">${card.rarity}</div>
-          <div class="image"><img src="${card.image || PLACEHOLDER_IMG}" alt="${card.name}"></div>
+      <div class="rarity">${card.rarity}</div>
+      <div class="name">${card.name}</div>
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="image">
+            <img src="${card.image || PLACEHOLDER_IMG}" alt="${card.name}">
+          </div>
           <div class="effect">${card.effect || "效果描述..."}</div>
-          <div class="atk">ATK: ${card.attack || Math.floor(Math.random()*200+50)}</div>
-          <div class="hp">HP: ${card.hp || Math.floor(Math.random()*1000+200)}</div>
+          <div class="atk">ATK: ${card.attack}</div>
+          <div class="hp">HP: ${card.hp}</div>
+        </div>
+        <div class="card-back">
+          <img src="${CARD_BACK_IMG}" alt="Card Back">
         </div>
       </div>
     `;
 
-    setTimeout(() => resultsDiv.appendChild(div), delay);
-
     // 點擊翻轉
-    div.addEventListener("click", () => {
-      div.classList.toggle("flipped");
+    div.querySelector(".card-inner").addEventListener("click", e => {
+      e.currentTarget.classList.toggle("flipped");
     });
 
-    setTimeout(() => div.classList.remove("ssr","ur"), 4000 + delay);
-
-    // 紀錄抽卡
-    const history = JSON.parse(localStorage.getItem("drawHistory") || "[]");
-    history.push({name: card.name, rarity: card.rarity, time: new Date().toISOString()});
-    localStorage.setItem("drawHistory", JSON.stringify(history));
+    setTimeout(() => resultsDiv.appendChild(div), delay);
   }
 
+  // 單抽
   document.getElementById("singleDraw").addEventListener("click", () => {
     resultsDiv.innerHTML = "";
     const poolKey = poolSelect.value;
@@ -127,8 +123,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     const pool = poolsData[poolKey];
     const card = drawCard(pool);
     showCard(card);
+    saveHistory(card);
   });
 
+  // 十連抽
   document.getElementById("tenDraw").addEventListener("click", () => {
     resultsDiv.innerHTML = "";
     const poolKey = poolSelect.value;
@@ -141,15 +139,27 @@ window.addEventListener("DOMContentLoaded", async () => {
       const c = drawCard(pool);
       if (["SR","SSR","UR"].includes(c.rarity)) hasSRplus = true;
       got.push(c);
+      saveHistory(c);
     }
     if (!hasSRplus) {
       const srPlus = pool.cards.find(c => ["SR","SSR","UR"].includes(c.rarity));
       if (srPlus) got[0] = srPlus;
     }
-    got.forEach((c,i)=>showCard(c, i*150));
+    got.forEach((c,i)=>showCard(c, i*140));
   });
 
   document.getElementById("clear").addEventListener("click", () => {
     resultsDiv.innerHTML = "";
   });
+
+  // --- 歷史紀錄 ---
+  function saveHistory(card) {
+    const history = JSON.parse(localStorage.getItem("drawHistory") || "[]");
+    history.push({
+      time: new Date().toLocaleString(),
+      name: card.name,
+      rarity: card.rarity
+    });
+    localStorage.setItem("drawHistory", JSON.stringify(history));
+  }
 });
