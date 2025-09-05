@@ -1,101 +1,155 @@
+// ====== 稀有度機率設定（總和需為 1）======
+const rarityRates = {
+  N: 0.5551666667,
+  R: 0.2775833333,
+  SR: 0.16655,
+  SSR: 0.0005,
+  UR: 0.0002
+};
+// ===================================
+
+// 卡片背面圖片設定（可自行替換）
+const CARD_BACK_IMG = "card_back.png"; // 這裡換成你設計的背面圖片
+const PLACEHOLDER_IMG = "default.png";
+
 window.addEventListener("DOMContentLoaded", async () => {
-  let poolsData = null;
+  let poolsRaw = null;
 
   try {
-    const res = await fetch("./pools.json");
-    poolsData = await res.json();
+    const res = await fetch("./pools.json", { cache: "no-store" });
+    poolsRaw = await res.json();
   } catch (err) {
     console.error("Failed to load pools.json", err);
     alert("無法載入卡池資料！");
     return;
   }
 
+  // 將 sharedNRSCards 合併進各池（有 inheritShared: true 才合併）
+  const poolsData = {};
+  for (const key of Object.keys(poolsRaw)) {
+    if (key === "sharedNRSCards") continue;
+    const pool = JSON.parse(JSON.stringify(poolsRaw[key])); // deep clone
+    if (pool.inheritShared && Array.isArray(poolsRaw.sharedNRSCards)) {
+      pool.cards = [...(pool.cards || []), ...poolsRaw.sharedNRSCards];
+    }
+    poolsData[key] = pool;
+  }
+
   const poolSelect = document.getElementById("poolSelect");
   const resultsDiv = document.getElementById("results");
 
-  // 載入卡池到選單
+  // 填入卡池選單
   Object.keys(poolsData).forEach(poolName => {
     const option = document.createElement("option");
     option.value = poolName;
-    option.textContent = poolsData[poolName].name;
+    option.textContent = poolsData[poolName].name || poolName;
     poolSelect.appendChild(option);
   });
 
-  // 儲存抽卡紀錄
-  function saveHistory(card) {
-    const history = JSON.parse(localStorage.getItem("gachaHistory")) || [];
-    history.push({
-      name: card.name,
-      rarity: card.rarity,
-      skill: card.skill,
-      effect: card.effect,
-      time: new Date().toLocaleString()
-    });
-    localStorage.setItem("gachaHistory", JSON.stringify(history));
-  }
-
-  // 抽卡
-  function drawCard(pool) {
-    const rand = Math.random();
-    let sum = 0;
-    for (const card of pool.cards) {
-      sum += card.rate || 0;
-      if (rand <= sum) return card;
+  // 機率健檢
+  (function checkRates(){
+    const sum = Object.values(rarityRates).reduce((a,b)=>a+b,0);
+    if (Math.abs(sum - 1) > 1e-6) {
+      console.warn(`⚠ 稀有度機率總和 = ${sum}，不等於 1！請修正 rarityRates。`);
     }
-    return pool.cards[pool.cards.length - 1]; // fallback
+  })();
+
+  // 依稀有度抽
+  function pickRarity() {
+    const rand = Math.random();
+    let acc = 0;
+    for (const rarity of ["N","R","SR","SSR","UR"]) {
+      acc += rarityRates[rarity] || 0;
+      if (rand <= acc) return rarity;
+    }
+    return "N"; // fallback
   }
 
-  // 顯示卡片
-  function showCard(card, delay = 0) {
+  function drawCard(pool) {
+    const rarity = pickRarity();
+    const grouped = {};
+    pool.cards.forEach(c => {
+      if (!grouped[c.rarity]) grouped[c.rarity] = [];
+      grouped[c.rarity].push(c);
+    });
+    const order = ["UR","SSR","SR","R","N"];
+    let idx = order.indexOf(rarity);
+    while (idx < order.length && (!grouped[order[idx]] || grouped[order[idx]].length === 0)) {
+      idx++;
+    }
+    const bucket = grouped[order[idx]] || pool.cards;
+    return bucket[Math.floor(Math.random() * bucket.length)];
+  }
+
+  // 生成卡片 DOM（背面先顯示）
+  function showCard(card, delay=0) {
     const div = document.createElement("div");
-    div.className = "card fly-in";
+    div.className = "card fly-in flip-card";
     div.setAttribute("data-rarity", card.rarity);
+    if (card.rarity === "SSR") div.classList.add("ssr");
+    if (card.rarity === "UR") div.classList.add("ur");
 
     div.innerHTML = `
-      <div class="rarity-label ${card.rarity}">${card.rarity}</div>
-      <strong>${card.name}</strong><br>
-      ${card.skill ? `技能: ${card.skill}<br>` : ""}
-      ${card.effect ? `效果: ${card.effect}<br>` : ""}
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <img src="${CARD_BACK_IMG}" alt="Card Back">
+        </div>
+        <div class="flip-card-back">
+          <div class="name">${card.name}</div>
+          <div class="rarity">${card.rarity}</div>
+          <div class="image"><img src="${card.image || PLACEHOLDER_IMG}" alt="${card.name}"></div>
+          <div class="effect">${card.effect || "效果描述..."}</div>
+          <div class="atk">ATK: ${card.attack || Math.floor(Math.random()*200+50)}</div>
+          <div class="hp">HP: ${card.hp || Math.floor(Math.random()*1000+200)}</div>
+        </div>
+      </div>
     `;
 
     setTimeout(() => resultsDiv.appendChild(div), delay);
 
-    // ✅ 儲存紀錄
-    saveHistory(card);
+    // 點擊翻轉
+    div.addEventListener("click", () => {
+      div.classList.toggle("flipped");
+    });
+
+    setTimeout(() => div.classList.remove("ssr","ur"), 4000 + delay);
+
+    // 紀錄抽卡
+    const history = JSON.parse(localStorage.getItem("drawHistory") || "[]");
+    history.push({name: card.name, rarity: card.rarity, time: new Date().toISOString()});
+    localStorage.setItem("drawHistory", JSON.stringify(history));
   }
 
-  // 單抽
   document.getElementById("singleDraw").addEventListener("click", () => {
     resultsDiv.innerHTML = "";
-    const poolName = poolSelect.value;
-    if (!poolName) return alert("請先選擇卡池！");
-    const pool = poolsData[poolName];
+    const poolKey = poolSelect.value;
+    if (!poolKey) return alert("請先選擇卡池！");
+    const pool = poolsData[poolKey];
     const card = drawCard(pool);
     showCard(card);
   });
 
-  // 十連抽
   document.getElementById("tenDraw").addEventListener("click", () => {
     resultsDiv.innerHTML = "";
-    const poolName = poolSelect.value;
-    if (!poolName) return alert("請先選擇卡池！");
-    const pool = poolsData[poolName];
+    const poolKey = poolSelect.value;
+    if (!poolKey) return alert("請先選擇卡池！");
+    const pool = poolsData[poolKey];
 
-    let gotSRorAbove = false;
-    const cards = [];
-
+    const got = [];
+    let hasSRplus = false;
     for (let i = 0; i < 10; i++) {
-      const card = drawCard(pool);
-      if (["SR", "SSR", "UR"].includes(card.rarity)) gotSRorAbove = true;
-      cards.push(card);
+      const c = drawCard(pool);
+      if (["SR","SSR","UR"].includes(c.rarity)) hasSRplus = true;
+      got.push(c);
     }
-
-    // 保底機制
-    if (!gotSRorAbove) {
-      const srCard = pool.cards.find(c => ["SR", "SSR", "UR"].includes(c.rarity));
-      if (srCard) cards[0] = srCard;
+    if (!hasSRplus) {
+      const srPlus = pool.cards.find(c => ["SR","SSR","UR"].includes(c.rarity));
+      if (srPlus) got[0] = srPlus;
     }
+    got.forEach((c,i)=>showCard(c, i*150));
+  });
 
-    cards.forEach((card, i) => showCard(card, i * 200));
+  document.getElementById("clear").addEventListener("click", () => {
+    resultsDiv.innerHTML = "";
   });
 });

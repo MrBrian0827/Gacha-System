@@ -3,72 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>抽卡機率表</title>
+  <title>抽卡紀錄</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* 專屬 history.html 調整 */
+    body {
+      padding: 10px;
+      background: #f0f2f5;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+      color: #333;
+    }
+    .history-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .card-history {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 10px;
+      transition: transform 0.2s;
+    }
+    .card-history:hover {
+      transform: translateY(-2px);
+    }
+    .card-history .image {
+      width: 80px;
+      height: 50px;
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+    .card-history .image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .card-history .info {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .card-history .info .name {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .card-history .info .rarity {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .rarity-N { background-color: #999; }
+    .rarity-R { background-color: #2196F3; }
+    .rarity-SR { background-color: #FF9800; }
+    .rarity-SSR { background-color: #F44336; }
+    .rarity-UR { background-color: #9C27B0; }
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .buttons button {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .btn-clear { background-color: #F44336; }
+    .btn-clear:hover { background-color: #D32F2F; }
+    .btn-home { background-color: #2196F3; }
+    .btn-home:hover { background-color: #1976D2; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>抽卡機率表</h1>
+  <h1>📜 抽卡紀錄</h1>
+  <div class="history-container" id="historyContainer">
+    <!-- 紀錄卡片會生成在這裡 -->
+  </div>
 
-    <div id="probabilityContainer" class="probability-table"></div>
-
-    <div class="buttons">
-      <button class="secondary" onclick="location.href='index.html'">返回抽卡頁面</button>
-    </div>
+  <div class="buttons">
+    <button class="btn-clear" id="clearHistory">清除紀錄</button>
+    <button class="btn-home" onclick="location.href='index.html'">返回主選單</button>
   </div>
 
   <script>
-    async function loadProbabilities() {
-      try {
-        const res = await fetch("./pools.json");
-        const poolsData = await res.json();
+    const container = document.getElementById("historyContainer");
+    let history = JSON.parse(localStorage.getItem("drawHistory") || "[]");
 
-        const container = document.getElementById("probabilityContainer");
-        container.innerHTML = "";
-
-        Object.keys(poolsData).forEach(poolKey => {
-          const pool = poolsData[poolKey];
-
-          // 卡池標題
-          const title = document.createElement("h2");
-          title.textContent = pool.name;
-          container.appendChild(title);
-
-          // 機率表格
-          const table = document.createElement("table");
-          table.className = "probability";
-
-          const thead = document.createElement("thead");
-          thead.innerHTML = `
-            <tr>
-              <th>名稱</th>
-              <th>稀有度</th>
-              <th>機率</th>
-            </tr>
-          `;
-          table.appendChild(thead);
-
-          const tbody = document.createElement("tbody");
-          pool.cards.forEach(card => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${card.name}</td>
-              <td class="rarity ${card.rarity}">${card.rarity}</td>
-              <td>${(card.rate * 100).toFixed(2)}%</td>
-            `;
-            tbody.appendChild(tr);
-          });
-          table.appendChild(tbody);
-
-          container.appendChild(table);
-        });
-      } catch (err) {
-        console.error("載入失敗:", err);
-        document.getElementById("probabilityContainer").innerHTML = "<p>無法載入機率表</p>";
+    function renderHistory() {
+      container.innerHTML = "";
+      if(history.length === 0){
+        container.innerHTML = "<p style='text-align:center;color:#666'>目前沒有抽卡紀錄</p>";
+        return;
       }
+      history.forEach(entry => {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card-history";
+        cardDiv.innerHTML = `
+          <div class="image">
+            <img src="${entry.card.image || 'https://via.placeholder.com/160x100.png?text=Card+Image'}" alt="${entry.card.name}">
+          </div>
+          <div class="info">
+            <div class="name">${entry.card.name}</div>
+            <div class="rarity rarity-${entry.card.rarity}">${entry.card.rarity}</div>
+            <div style="font-size:0.8rem;color:#666;">抽於: ${new Date(entry.timestamp).toLocaleString()}</div>
+          </div>
+        `;
+        container.appendChild(cardDiv);
+      });
     }
 
-    loadProbabilities();
+    renderHistory();
+
+    document.getElementById("clearHistory").addEventListener("click", () => {
+      if(confirm("確定要清除所有抽卡紀錄嗎？")) {
+        localStorage.removeItem("drawHistory");
+        history = [];
+        renderHistory();
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,86 +1,74 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>抽卡紀錄</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .history-container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-    }
-    .history-title {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
-    .history-list {
-      background: #fff;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .history-item {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-    }
-    .history-item:last-child {
-      border-bottom: none;
-    }
-    .clear-btn {
-      margin-top: 15px;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      background: #e74c3c;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .clear-btn:hover {
-      background: #c0392b;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抽卡紀錄</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="history-container">
-    <h1 class="history-title">抽卡紀錄</h1>
-    <div id="historyList" class="history-list"></div>
-    <button class="clear-btn" id="clearHistory">清除紀錄</button>
+  <div class="container">
+    <h1>📜 抽卡紀錄</h1>
+    
+    <div class="buttons">
+      <button id="backHome">🏠 回主選單</button>
+      <button id="clearHistory">🗑 清除紀錄</button>
+    </div>
+
+    <div id="historyList"></div>
   </div>
 
-  <script>
-    function loadHistory() {
-      const historyList = document.getElementById("historyList");
-      const history = JSON.parse(localStorage.getItem("gachaHistory")) || [];
+<script>
+const historyDiv = document.getElementById("historyList");
 
-      if (history.length === 0) {
-        historyList.innerHTML = "<p style='text-align:center;color:#888;'>目前沒有紀錄</p>";
-        return;
-      }
+// 載入歷史紀錄
+function loadHistory() {
+  historyDiv.innerHTML = "";
+  const history = JSON.parse(localStorage.getItem("drawHistory") || "[]");
+  if(history.length === 0) {
+    historyDiv.innerHTML = "<p>目前沒有抽卡紀錄。</p>";
+    return;
+  }
+  history.forEach((card, idx) => {
+    const div = document.createElement("div");
+    div.className = "history-card";
 
-      historyList.innerHTML = history.map(item => `
-        <div class="history-item">
-          <strong>${item.name}</strong> (${item.rarity})<br>
-          ${item.skill ? `技能: ${item.skill}<br>` : ""}
-          ${item.effect ? `效果: ${item.effect}<br>` : ""}
-          <small style="color:#666;">${item.time}</small>
+    div.innerHTML = `
+      <div class="history-card-inner">
+        <div class="history-card-front">
+          <div class="name">${card.name}</div>
+          <div class="rarity rarity-${card.rarity}">${card.rarity}</div>
+          <div class="image"><img src="${card.image || 'https://via.placeholder.com/180x260.png?text=Card+Image'}" alt="${card.name}"></div>
+          <div class="effect">${card.effect || ""}</div>
+          <div class="atk">ATK: ${card.attack || 0}</div>
+          <div class="hp">HP: ${card.hp || 0}</div>
         </div>
-      `).join("");
-    }
+        <div class="history-card-back">卡片背面</div>
+      </div>
+    `;
 
-    document.getElementById("clearHistory").addEventListener("click", () => {
-      if (confirm("確定要清除所有抽卡紀錄嗎？")) {
-        localStorage.removeItem("gachaHistory");
-        loadHistory();
-      }
+    div.addEventListener("click", () => {
+      div.classList.toggle("flipped");
     });
 
+    historyDiv.appendChild(div);
+  });
+}
+
+// 清除歷史
+document.getElementById("clearHistory").addEventListener("click", () => {
+  if(confirm("確定要清除所有抽卡紀錄嗎？")) {
+    localStorage.removeItem("drawHistory");
     loadHistory();
-  </script>
+  }
+});
+
+// 回主選單
+document.getElementById("backHome").addEventListener("click", () => {
+  location.href = "index.html";
+});
+
+loadHistory();
+</script>
 </body>
 </html>
