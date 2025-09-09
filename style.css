@@ -115,11 +115,11 @@ button:hover {
 }
 
 /* 稀有度顏色 */
-.rarity-N { color: #b87333; }    /* 銅色 */
-.rarity-R { color: #c0c0c0; }    /* 白銀 */
-.rarity-SR { color: #ffd700; }   /* 金色 */
-.rarity-SSR { color: #ff4500; }  /* 紅色 */
-.rarity-UR { color: #8a2be2; }   /* 彩色紫色 */
+.rarity-N { color: #b87333; }
+.rarity-R { color: #c0c0c0; }
+.rarity-SR { color: #ffd700; }
+.rarity-SSR { color: #ff4500; }
+.rarity-UR { color: #8a2be2; }
 
 .card-front .image {
   flex: 1;
@@ -147,7 +147,7 @@ button:hover {
 
 /* ====== modal ====== */
 .modal {
-  display: none; /* 預設隱藏 */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -166,6 +166,24 @@ button:hover {
   width: 90%;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  max-height: 80vh;
+  overflow-y: auto; /* 超出高度可滾動 */
+}
+
+/* ====== 滾動條美化 ====== */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #2b7a78;
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #3a9d95;
 }
 
 .close-btn {
@@ -179,7 +197,24 @@ button:hover {
   font-size: 14px;
 }
 
-/* ====== 手機響應 ====== */
+/* ====== 放大卡片 ====== */
+.card.zoom {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 440px;
+  z-index: 9999;
+  transform: translate(-50%, -50%) scale(1.5);
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.card.zoom:active {
+  cursor: grabbing;
+}
+
+/* ====== 手機自適應 ====== */
 @media (max-width: 600px) {
   .card {
     width: 120px;
@@ -192,5 +227,11 @@ button:hover {
 
   #results {
     justify-content: center;
+  }
+
+  .card.zoom {
+    width: 240px;
+    height: 360px;
+    transform: translate(-50%, -50%) scale(1.5);
   }
 }

@@ -1,26 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ====== 稀有度機率設定 (可直接調整) ======
-  let PROB_UR  = 0.02;   // UR 0.02%
-  let PROB_SSR = 0.05;   // SSR 0.05%
-  let PROB_SR  = 4.93;   // SR 4.93%
-  // R 剩下 = 100 - (UR+SSR+SR+N)
-  // N 剩下 = 100 - (UR+SSR+SR+R)
+  // ====== 稀有度機率設定 ======
+  let PROB_UR  = 2;
+  let PROB_SSR = 5;
+  let PROB_SR  = 15;
+  let PROB_R   = 30;
+  let PROB_N   = 100 - PROB_UR - PROB_SSR - PROB_SR - PROB_R;
 
-  let history = [];       // 抽卡紀錄
-  let totalDraws = 0;     // 總抽數
+  let history = [];
+  let totalDraws = 0;
+  let totalRounds = 0;
 
   // ====== 更新抽卡機率 modal ======
   function updateRateModal() {
-    const rateModal = document.getElementById('rateModal');
-    if (!rateModal) return;
-    const ul = rateModal.querySelector('ul');
+    const ul = document.querySelector('#rateModal ul');
     if (!ul) return;
-
-    const sumHigh = PROB_UR + PROB_SSR + PROB_SR;
-    const PROB_R = 30;  // 固定 R
-    const PROB_N = 100 - sumHigh - PROB_R;
-
     ul.innerHTML = `
       <li>N 卡：${PROB_N.toFixed(2)}%</li>
       <li>R 卡：${PROB_R.toFixed(2)}%</li>
@@ -35,20 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ====== 抽卡稀有度函數 ======
   function getRarity() {
     totalDraws++;
-    // 200 抽保底 UR
-    if (totalDraws % 200 === 0) return 'UR';
-
+    if (totalDraws % 200 === 0) totalRounds++;
     const roll = Math.random() * 100;
-
     if (roll < PROB_UR) return 'UR';
     if (roll < PROB_UR + PROB_SSR) return 'SSR';
     if (roll < PROB_UR + PROB_SSR + PROB_SR) return 'SR';
-    if (roll < PROB_UR + PROB_SSR + PROB_SR + 30) return 'R'; // R 固定 30%
+    if (roll < PROB_UR + PROB_SSR + PROB_SR + PROB_R) return 'R';
     return 'N';
   }
 
   // ====== 建立卡片 DOM 元素 ======
-  function createCardElement(card, drawNumber) {
+  function createCardElement(card, drawNumber=null) {
     const wrapper = document.createElement('div');
     wrapper.className = 'card';
     const inner = document.createElement('div');
@@ -61,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const front = document.createElement('div');
     front.className = 'card-front';
     front.innerHTML = `
-      <div class="draw-number">第 ${drawNumber} 抽</div>
+      ${drawNumber ? `<div class="draw-number">第 ${drawNumber} 抽</div>` : ''}
       <div class="name">${card.name}</div>
       <div class="rarity rarity-${card.rarity}">${card.rarity}</div>
       <div class="image">${card.image}</div>
@@ -73,113 +64,137 @@ document.addEventListener('DOMContentLoaded', () => {
     inner.appendChild(front);
     wrapper.appendChild(inner);
 
+    // ====== 單擊翻面 / 雙擊放大 ======
+    let clickTimeout;
+    wrapper.addEventListener('click', e => {
+      if (clickTimeout) return; // 已有等待的單擊
+      clickTimeout = setTimeout(() => {
+        wrapper.classList.toggle('flip');
+        clickTimeout = null;
+      }, 250); // 延遲判斷單擊是否為雙擊
+    });
+
+    wrapper.addEventListener('dblclick', e => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+      }
+      toggleZoom(wrapper);
+    });
+
     return wrapper;
   }
 
   // ====== 更新抽卡次數顯示 ======
   function updateDrawCount() {
     const countEl = document.getElementById('drawCount');
-    if (countEl) countEl.textContent = `目前第 ${totalDraws} 抽`;
+    if(countEl) countEl.textContent = `目前第 ${totalDraws} 抽 (第 ${totalRounds+1} 輪)`;
   }
 
-  // ====== 單抽功能 ======
+  // ====== 放大卡片 ======
+  let zoomedCard = null;
+  function toggleZoom(card) {
+    if(zoomedCard && zoomedCard !== card) zoomedCard.classList.remove('zoom');
+    card.classList.toggle('zoom');
+    zoomedCard = card.classList.contains('zoom') ? card : null;
+  }
+
+  // ====== 單抽 ======
   function singleDraw() {
     const rarity = getRarity();
-    const candidates = pool.filter(c => c.rarity === rarity);
-    if (candidates.length === 0) return;
-    const card = candidates[Math.floor(Math.random() * candidates.length)];
+    const candidates = pool.filter(c => c.rarity===rarity);
+    if(!candidates.length) return;
+    const card = candidates[Math.floor(Math.random()*candidates.length)];
     history.push(card);
 
     const results = document.getElementById('results');
     results.innerHTML = '';
-    const el = createCardElement(card, totalDraws);
+    const el = createCardElement(card);
     results.appendChild(el);
-    setTimeout(() => el.classList.add('flip'), 120);
+    setTimeout(()=>el.classList.add('flip'),120);
 
     updateDrawCount();
   }
 
-  // ====== 十連抽功能 ======
+  // ====== 十連抽 ======
   function multiDraw() {
     const resultsArr = [];
     let hasSRorAbove = false;
 
-    for (let i = 0; i < 10; i++) {
+    for(let i=0;i<10;i++){
       const rarity = getRarity();
-      if (['SR', 'SSR', 'UR'].includes(rarity)) hasSRorAbove = true;
-      const candidates = pool.filter(c => c.rarity === rarity);
-      resultsArr.push(candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : pool[Math.floor(Math.random() * pool.length)]);
+      if(['SR','SSR','UR'].includes(rarity)) hasSRorAbove=true;
+      const candidates = pool.filter(c=>c.rarity===rarity);
+      resultsArr.push(candidates.length>0?candidates[Math.floor(Math.random()*candidates.length)]:pool[Math.floor(Math.random()*pool.length)]);
     }
 
-    // 十連抽保底一張 SR
-    if (!hasSRorAbove) {
-      const srCandidates = pool.filter(c => c.rarity === 'SR');
-      if (srCandidates.length > 0) resultsArr[9] = srCandidates[Math.floor(Math.random() * srCandidates.length)];
+    if(!hasSRorAbove){
+      const srCandidates = pool.filter(c=>c.rarity==='SR');
+      if(srCandidates.length>0) resultsArr[9]=srCandidates[Math.floor(Math.random()*srCandidates.length)];
     }
 
     const container = document.getElementById('results');
     container.innerHTML = '';
-    resultsArr.forEach((card, idx) => {
+    resultsArr.forEach((card,idx)=>{
       history.push(card);
-      const el = createCardElement(card, totalDraws - resultsArr.length + idx + 1);
+      const el = createCardElement(card);
       container.appendChild(el);
-      setTimeout(() => el.classList.add('flip'), 120 + idx * 300);
+      setTimeout(()=>el.classList.add('flip'),120+idx*300);
     });
 
     updateDrawCount();
   }
 
   // ====== 顯示抽卡紀錄 modal ======
-  function showHistoryModal() {
+  function showHistoryModal(){
     const historyContainer = document.getElementById('history');
-    historyContainer.innerHTML = '';
-    history.slice().forEach((card, idx) => {
-      const el = createCardElement(card, idx + 1); // 顯示第幾抽
-      el.classList.add('flip'); // 直接翻開
+    historyContainer.innerHTML='';
+    const perRow = 5;
+    history.slice().forEach((card,idx)=>{
+      const el = createCardElement(card, idx+1);
+      el.classList.add('flip');
+      el.style.marginRight = ((idx+1)%perRow===0)?'0':'10px';
       historyContainer.appendChild(el);
     });
     openModal('historyModal');
   }
 
   // ====== modal 開關 ======
-  function openModal(id) {
-    const modal = document.getElementById(id);
-    if(modal) modal.style.display = 'flex';
+  function openModal(id){
+    const modal=document.getElementById(id);
+    if(modal) modal.style.display='flex';
   }
 
-  function closeModal(id) {
-    const modal = document.getElementById(id);
-    if(modal) modal.style.display = 'none';
+  function closeModal(id){
+    const modal=document.getElementById(id);
+    if(modal) modal.style.display='none';
   }
 
-  document.querySelectorAll('.close-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
+  document.querySelectorAll('.close-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
       const modal = e.target.closest('.modal');
       if(modal) closeModal(modal.id);
     });
   });
 
-  document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', e => {
-      if(e.target === modal) closeModal(modal.id);
+  document.querySelectorAll('.modal').forEach(modal=>{
+    modal.addEventListener('click',e=>{
+      if(e.target===modal) closeModal(modal.id);
     });
   });
 
   // ====== 綁定按鈕 ======
-  document.getElementById('btnSingle').addEventListener('click', singleDraw);
-  document.getElementById('btnMulti').addEventListener('click', multiDraw);
-  document.getElementById('btnRates').addEventListener('click', () => openModal('rateModal'));
-  document.getElementById('btnHistory').addEventListener('click', showHistoryModal);
-
-  // ====== 清空抽卡紀錄 ======
-  document.getElementById('btnClearHistory').addEventListener('click', () => {
-    if (!confirm("確定要清空抽卡紀錄嗎？此操作無法復原。")) return;
-    history = [];
-    document.getElementById('history').innerHTML = '';
+  document.getElementById('btnSingle').addEventListener('click',singleDraw);
+  document.getElementById('btnMulti').addEventListener('click',multiDraw);
+  document.getElementById('btnRates').addEventListener('click',()=>openModal('rateModal'));
+  document.getElementById('btnHistory').addEventListener('click',showHistoryModal);
+  document.getElementById('btnClearHistory').addEventListener('click',()=>{
+    if(!confirm("確定要清空抽卡紀錄嗎？此操作無法復原。")) return;
+    history=[];
+    document.getElementById('history').innerHTML='';
     updateDrawCount();
   });
 
-  // 初始化抽卡次數顯示與機率
   updateDrawCount();
   updateRateModal();
 });
