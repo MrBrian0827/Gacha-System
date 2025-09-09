@@ -53,6 +53,8 @@ button:hover {
   height: 220px;
   perspective: 1000px;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .card-inner {
@@ -115,11 +117,24 @@ button:hover {
 }
 
 /* 稀有度顏色 */
-.rarity-N { color: #b87333; }
-.rarity-R { color: #c0c0c0; }
-.rarity-SR { color: #ffd700; }
-.rarity-SSR { color: #ff4500; }
-.rarity-UR { color: #8a2be2; }
+.rarity-N { color: #b87333; }    /* 銅色 */
+.rarity-R { color: #c0c0c0; }    /* 白銀 */
+.rarity-SR { color: #ffd700; }   /* 金色 */
+.rarity-SSR { color: #ff4500; }  /* 紅色 */
+.rarity-UR { color: #ff69b4; }   /* 彩虹粉色，顯眼的 UR */
+
+/* 卡片發光效果 */
+.highlight.SSR { box-shadow: 0 0 15px 3px rgba(255,69,0,0.7), 0 0 25px 5px rgba(255,99,71,0.5); }
+.highlight.UR { 
+  box-shadow: 0 0 15px 3px #ff69b4, 0 0 25px 5px #ffb6c1, 0 0 40px 10px #ffd700;
+  animation: urGlow 1.5s infinite alternate;
+}
+
+@keyframes urGlow {
+  0% { box-shadow: 0 0 15px 3px #ff69b4, 0 0 25px 5px #ffb6c1, 0 0 40px 10px #ffd700; }
+  50% { box-shadow: 0 0 20px 5px #ff1493, 0 0 30px 7px #ff69b4, 0 0 50px 12px #ffdab9; }
+  100% { box-shadow: 0 0 15px 3px #ff69b4, 0 0 25px 5px #ffb6c1, 0 0 40px 10px #ffd700; }
+}
 
 .card-front .image {
   flex: 1;
@@ -145,9 +160,20 @@ button:hover {
   font-size: 12px;
 }
 
+/* ====== 卡片放大 ====== */
+.card.zoom {
+  position: fixed !important;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.5);
+  z-index: 9999;
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
 /* ====== modal ====== */
 .modal {
-  display: none;
+  display: none; /* 預設隱藏 */
   position: fixed;
   top: 0;
   left: 0;
@@ -167,23 +193,7 @@ button:hover {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   max-height: 80vh;
-  overflow-y: auto; /* 超出高度可滾動 */
-}
-
-/* ====== 滾動條美化 ====== */
-.modal-content::-webkit-scrollbar {
-  width: 8px;
-}
-.modal-content::-webkit-scrollbar-track {
-  background: #f0f0f0;
-  border-radius: 4px;
-}
-.modal-content::-webkit-scrollbar-thumb {
-  background: #2b7a78;
-  border-radius: 4px;
-}
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #3a9d95;
+  overflow-y: auto;
 }
 
 .close-btn {
@@ -197,24 +207,7 @@ button:hover {
   font-size: 14px;
 }
 
-/* ====== 放大卡片 ====== */
-.card.zoom {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 300px;
-  height: 440px;
-  z-index: 9999;
-  transform: translate(-50%, -50%) scale(1.5);
-  cursor: grab;
-  transition: transform 0.2s ease;
-}
-
-.card.zoom:active {
-  cursor: grabbing;
-}
-
-/* ====== 手機自適應 ====== */
+/* ====== 手機響應 ====== */
 @media (max-width: 600px) {
   .card {
     width: 120px;
@@ -229,9 +222,16 @@ button:hover {
     justify-content: center;
   }
 
+  /* 手機版放大 */
   .card.zoom {
-    width: 240px;
-    height: 360px;
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(1.3) !important;
   }
+}
+
+/* ====== 抽卡紀錄排列 ====== */
+#history {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  justify-items: center;
 }
