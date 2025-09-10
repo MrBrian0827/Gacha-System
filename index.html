@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>抽卡系統</title>
 
-  <!-- 禁用 HTML 快取 -->
+  <!-- 禁用快取 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+
+  <!-- 樣式 -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-
     <h1>抽卡系統</h1>
 
-    <!-- 顯示目前第幾抽 -->
     <div id="drawCount" style="margin-bottom:10px;">目前第 0 抽</div>
 
-    <!-- 抽卡按鈕 -->
     <div class="buttons">
       <button id="btnSingle">單抽</button>
       <button id="btnMulti">十連抽</button>
@@ -27,7 +27,6 @@
       <button id="btnClearHistory">清空紀錄</button>
     </div>
 
-    <!-- 抽卡結果區 -->
     <div id="results" class="results"></div>
 
     <!-- 抽卡紀錄 modal -->
@@ -43,34 +42,24 @@
     <div id="rateModal" class="modal">
       <div class="modal-content">
         <h2>卡池機率</h2>
-        <ul>
-          <!-- 由 script.js 動態生成 -->
-        </ul>
+        <ul></ul>
         <button class="close-btn">關閉</button>
+      </div>
+    </div>
+
+    <!-- 簽名框 -->
+    <div id="signatureModal" class="modal">
+      <div class="modal-content">
+        <h2>請簽名</h2>
+        <canvas id="signatureCanvas"></canvas>
       </div>
     </div>
 
   </div>
 
-  <!-- ====== 動態載入 CSS、cards.js、script.js，自動清快取 ====== -->
-  <script>
-    const timestamp = new Date().getTime();
-
-    // 載入 CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'style.css?v=' + timestamp;
-    document.head.appendChild(link);
-
-    // 載入 cards.js
-    const cardsScript = document.createElement('script');
-    cardsScript.src = 'cards.js?v=' + timestamp;
-    document.body.appendChild(cardsScript);
-
-    // 載入 script.js
-    const mainScript = document.createElement('script');
-    mainScript.src = 'script.js?v=' + timestamp;
-    document.body.appendChild(mainScript);
-  </script>
+  <!-- 卡片資料 -->
+  <script src="cards.js"></script>
+  <!-- 抽卡邏輯 -->
+  <script src="script.js"></script>
 </body>
 </html>
