@@ -55,6 +55,7 @@ button:hover {
   cursor: pointer;
   position: relative;
   z-index: 1;
+  overflow: visible; /* 允許光效 */
 }
 
 .card-inner {
@@ -124,10 +125,20 @@ button:hover {
 .rarity-UR { color: #ff69b4; }   /* 彩虹粉色，顯眼的 UR */
 
 /* 卡片發光效果 */
-.highlight.SSR { box-shadow: 0 0 15px 3px rgba(255,69,0,0.7), 0 0 25px 5px rgba(255,99,71,0.5); }
+.highlight.SSR { 
+  box-shadow: 0 0 15px 3px rgba(255,69,0,0.7), 0 0 25px 5px rgba(255,99,71,0.5); 
+}
+
 .highlight.UR { 
   box-shadow: 0 0 15px 3px #ff69b4, 0 0 25px 5px #ffb6c1, 0 0 40px 10px #ffd700;
+  -webkit-animation: urGlow 1.5s infinite alternate;
   animation: urGlow 1.5s infinite alternate;
+}
+
+@-webkit-keyframes urGlow {
+  0% { box-shadow: 0 0 15px 3px #ff69b4, 0 0 25px 5px #ffb6c1, 0 0 40px 10px #ffd700; }
+  50% { box-shadow: 0 0 20px 5px #ff1493, 0 0 30px 7px #ff69b4, 0 0 50px 12px #ffdab9; }
+  100% { box-shadow: 0 0 15px 3px #ff69b4, 0 0 25px 5px #ffb6c1, 0 0 40px 10px #ffd700; }
 }
 
 @keyframes urGlow {
