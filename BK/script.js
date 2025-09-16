@@ -1,309 +1,247 @@
-document.addEventListener('DOMContentLoaded', () => {
+// 完整修正版 script.js（替換整個檔案）
+document.addEventListener("DOMContentLoaded", () => {
 
-  // ====== 稀有度機率設定 ======
-  let PROB_UR  = 2;
-  let PROB_SSR = 5;
-  let PROB_SR  = 15;
-  let PROB_R   = 30;
-  let PROB_N   = 100 - PROB_UR - PROB_SSR - PROB_SR - PROB_R;
+  // -------- DOM references --------
+  const resultsDiv = document.getElementById("results");
+  const drawCountDiv = document.getElementById("drawCount");
+  const historyDiv = document.getElementById("history");
+  const signatureModal = document.getElementById("signatureModal");
+  const signatureCanvas = document.getElementById("signatureCanvas");
+  const rateModal = document.getElementById("rateModal");
+  const historyModal = document.getElementById("historyModal");
 
-  let history = [];
-  let totalDraws = 0;
-  let totalRounds = 0;
-  const FLIP_DELAY = 400;
+  const btnSingle = document.getElementById("btnSingle");
+  const btnMulti = document.getElementById("btnMulti");
+  const btnRates = document.getElementById("btnRates");
+  const btnHistory = document.getElementById("btnHistory");
+  const btnClearHistory = document.getElementById("btnClearHistory");
 
-  let currentDrawType = null; // 用來記錄是單抽還是十連抽
+  // -------- state --------
+  let drawCount = 0;
+  let drawHistory = [];
+  let pendingDrawCount = 0;
 
-  // ====== 更新抽卡機率 modal ======
-  function updateRateModal() {
-    const ul = document.querySelector('#rateModal ul');
-    if (!ul) return;
-    ul.innerHTML = `
-      <li>N 卡：${PROB_N.toFixed(2)}%</li>
-      <li>R 卡：${PROB_R.toFixed(2)}%</li>
-      <li>SR 卡：${PROB_SR.toFixed(2)}%</li>
-      <li>SSR 卡：${PROB_SSR.toFixed(2)}%</li>
-      <li>UR 卡：${PROB_UR.toFixed(2)}%</li>
-    `;
-  }
-
-  updateRateModal();
-
-  // ====== 抽卡稀有度函數 ======
-  function getRarity() {
-    totalDraws++;
-    if (totalDraws % 200 === 0) totalRounds++;
-    const roll = Math.random() * 100;
-    if (roll < PROB_UR) return 'UR';
-    if (roll < PROB_UR + PROB_SSR) return 'SSR';
-    if (roll < PROB_UR + PROB_SSR + PROB_SR) return 'SR';
-    if (roll < PROB_UR + PROB_SSR + PROB_SR + PROB_R) return 'R';
-    return 'N';
-  }
-
-  // ====== 建立卡片 DOM 元素 ======
-  function createCardElement(card, drawNumber = null, isSpecial = false) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'card';
-    if (isSpecial) wrapper.classList.add('highlight', card.rarity);
-    const inner = document.createElement('div');
-    inner.className = 'card-inner';
-
-    const back = document.createElement('div');
-    back.className = 'card-back';
-    back.textContent = '卡背';
-
-    const front = document.createElement('div');
-    front.className = 'card-front';
-    front.innerHTML = `
-      ${drawNumber ? `<div class="draw-number">第 ${drawNumber} 抽</div>` : ''}
-      <div class="name">${card.name}</div>
-      <div class="rarity rarity-${card.rarity}">${card.rarity}</div>
-      <div class="image">${card.image}</div>
-      <div class="effect">${card.effect}</div>
-      <div class="stats"><span>⚔️ ${card.attack}</span> <span>❤️ ${card.hp}</span></div>
-    `;
-
-    inner.appendChild(back);
-    inner.appendChild(front);
-    wrapper.appendChild(inner);
-
-    // 單擊翻面 / 雙擊放大
-    let clickTimeout;
-    wrapper.addEventListener('click', e => {
-      if (clickTimeout) return;
-      clickTimeout = setTimeout(() => {
-        wrapper.classList.toggle('flip');
-        clickTimeout = null;
-      }, 250);
-    });
-    wrapper.addEventListener('dblclick', e => {
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = null;
-      }
-      toggleZoom(wrapper);
-    });
-
-    return wrapper;
-  }
-
-  // ====== 更新抽卡次數顯示 ======
-  function updateDrawCount() {
-    const countEl = document.getElementById('drawCount');
-    if (countEl) countEl.textContent = `目前第 ${totalDraws} 抽 (第 ${totalRounds+1} 輪)`;
-  }
-
-  // ====== 放大卡片 ======
-  let zoomedCard = null;
-  function toggleZoom(cardEl) {
-    if (zoomedCard && zoomedCard !== cardEl) zoomedCard.classList.remove('zoom');
-    if (!cardEl.classList.contains('zoom')) {
-      cardEl.classList.add('zoom');
-      zoomedCard = cardEl;
-      let offsetX, offsetY, isDragging = false;
-
-      const onMouseMove = (e) => {
-        if (!isDragging) return;
-        let x = e.clientX - offsetX;
-        let y = e.clientY - offsetY;
-        x = Math.max(0, Math.min(window.innerWidth - cardEl.offsetWidth, x));
-        y = Math.max(0, Math.min(window.innerHeight - cardEl.offsetHeight, y));
-        cardEl.style.left = x + 'px';
-        cardEl.style.top = y + 'px';
-        cardEl.style.transform = 'translate(0,0) scale(1.5)';
-      };
-
-      cardEl.addEventListener('mousedown', e => {
-        isDragging = true;
-        offsetX = e.clientX - cardEl.offsetLeft;
-        offsetY = e.clientY - cardEl.offsetTop;
-        e.preventDefault();
-      });
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', () => { isDragging = false; });
-
-      cardEl.addEventListener('touchstart', e => {
-        isDragging = true;
-        const touch = e.touches[0];
-        offsetX = touch.clientX - cardEl.offsetLeft;
-        offsetY = touch.clientY - cardEl.offsetTop;
-        e.preventDefault();
-      });
-      cardEl.addEventListener('touchmove', e => {
-        if (!isDragging) return;
-        const touch = e.touches[0];
-        let x = touch.clientX - offsetX;
-        let y = touch.clientY - offsetY;
-        x = Math.max(0, Math.min(window.innerWidth - cardEl.offsetWidth, x));
-        y = Math.max(0, Math.min(window.innerHeight - cardEl.offsetHeight, y));
-        cardEl.style.left = x + 'px';
-        cardEl.style.top = y + 'px';
-        cardEl.style.transform = 'translate(0,0) scale(1.5)';
-      });
-      cardEl.addEventListener('touchend', () => { isDragging = false; });
-    } else {
-      cardEl.classList.remove('zoom');
-      zoomedCard = null;
-      cardEl.style.left = '';
-      cardEl.style.top = '';
-      cardEl.style.transform = '';
-    }
-  }
-
-  // ====== 顯示抽卡紀錄 modal ======
-  function showHistoryModal() {
-    const historyContainer = document.getElementById('history');
-    historyContainer.innerHTML='';
-    const perRow = 5;
-    history.slice().forEach((card, idx) => {
-      const el = createCardElement(card, idx+1, ['SSR','UR'].includes(card.rarity));
-      el.classList.add('flip');
-      el.style.marginRight = ((idx+1)%perRow===0)?'0':'10px';
-      historyContainer.appendChild(el);
-    });
-    openModal('historyModal');
-  }
-
-  function openModal(id) {
-    const modal = document.getElementById(id);
-    if(modal) modal.style.display='flex';
-  }
-  function closeModal(id) {
-    const modal = document.getElementById(id);
-    if(modal) modal.style.display='none';
-  }
-  document.querySelectorAll('.close-btn').forEach(btn=>{
-    btn.addEventListener('click', e=>{
-      const modal = e.target.closest('.modal');
-      if(modal) closeModal(modal.id);
-    });
-  });
-  document.querySelectorAll('.modal').forEach(modal=>{
-    modal.addEventListener('click', e=>{
-      if(e.target===modal) closeModal(modal.id);
-    });
-  });
-
-  // ====== 單抽/十連抽（觸發簽名） ======
-  function triggerDraw(drawType){
-    currentDrawType = drawType;
-    const canvas = document.getElementById('signatureCanvas');
-    const signatureModal = document.getElementById('signatureModal');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width,canvas.height); // 清空上一次簽名
-    signatureModal.style.display = 'flex';
-  }
-
-  document.getElementById('btnSingle').addEventListener('click', ()=> triggerDraw('single'));
-  document.getElementById('btnMulti').addEventListener('click', ()=> triggerDraw('multi'));
-
-  // ====== 簽名互動 ======
-  const signatureModal = document.getElementById('signatureModal');
-  const canvas = document.getElementById('signatureCanvas');
-  const ctx = canvas.getContext('2d');
+  // -------- Canvas setup & helpers --------
+  const ctx = signatureCanvas.getContext("2d");
   let drawing = false;
   let lastX = 0, lastY = 0;
 
   function resizeCanvas() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
+    const ratio = window.devicePixelRatio || 1;
+    const cssW = Math.max(1, signatureCanvas.clientWidth);
+    const cssH = Math.max(1, signatureCanvas.clientHeight);
+    signatureCanvas.width = Math.round(cssW * ratio);
+    signatureCanvas.height = Math.round(cssH * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.lineWidth = 3;
-    ctx.strokeStyle = '#2b7a78';
+    ctx.strokeStyle = "#2b7a78";
+    ctx.lineCap = "round";
+    ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
   }
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
 
-  function startDrawing(e){
-    drawing=true;
-    const rect=canvas.getBoundingClientRect();
-    const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-    lastX=x; lastY=y;
-  }
-  function draw(e){
-    if(!drawing) return;
-    const rect=canvas.getBoundingClientRect();
-    const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-    ctx.beginPath();
-    ctx.moveTo(lastX,lastY);
-    ctx.lineTo(x,y);
-    ctx.stroke();
-    lastX=x; lastY=y;
-  }
-  function stopDrawing(e){
-    drawing=false;
-    signatureModal.style.display='none';
-    if(currentDrawType==='single') singleDraw();
-    if(currentDrawType==='multi') multiDraw();
+  function getPointerPosOnCanvas(e) {
+    const rect = signatureCanvas.getBoundingClientRect();
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : (e.clientX !== undefined ? e.clientX : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : 0));
+    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : (e.clientY !== undefined ? e.clientY : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0));
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mouseout', stopDrawing);
+  signatureCanvas.addEventListener("pointerdown", (e) => {
+    if (!["flex", "block"].includes(signatureModal.style.display)) return;
+    signatureCanvas.setPointerCapture && signatureCanvas.setPointerCapture(e.pointerId);
+    drawing = true;
+    const pos = getPointerPosOnCanvas(e);
+    lastX = pos.x; lastY = pos.y;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY);
+    e.preventDefault();
+  }, { passive: false });
 
-  canvas.addEventListener('touchstart', startDrawing, {passive:false});
-  canvas.addEventListener('touchmove', draw, {passive:false});
-  canvas.addEventListener('touchend', stopDrawing);
+  signatureCanvas.addEventListener("pointermove", (e) => {
+    if (!drawing) return;
+    const pos = getPointerPosOnCanvas(e);
+    ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    lastX = pos.x; lastY = pos.y;
+    e.preventDefault();
+  }, { passive: false });
 
-  // ====== 抽卡函數 ======
-  function singleDraw() {
-    const rarity = getRarity();
-    const candidates = pool.filter(c => c.rarity===rarity);
-    if(!candidates.length) return;
-    const card = candidates[Math.floor(Math.random()*candidates.length)];
-    history.push(card);
-
-    const results = document.getElementById('results');
-    results.innerHTML = '';
-    const isSpecial = ['SSR','UR'].includes(card.rarity);
-    const el = createCardElement(card, null, isSpecial);
-    results.appendChild(el);
-
-    if (!isSpecial) setTimeout(()=> el.classList.add('flip'), FLIP_DELAY);
-
-    updateDrawCount();
-  }
-
-  function multiDraw() {
-    const resultsArr = [];
-    let hasSRorAbove=false;
-    for(let i=0;i<10;i++){
-      const rarity=getRarity();
-      if(['SR','SSR','UR'].includes(rarity)) hasSRorAbove=true;
-      const candidates=pool.filter(c=>c.rarity===rarity);
-      resultsArr.push(candidates.length>0?candidates[Math.floor(Math.random()*candidates.length)]:pool[Math.floor(Math.random()*pool.length)]);
-    }
-    if(!hasSRorAbove){
-      const srCandidates = pool.filter(c=>c.rarity==='SR');
-      if(srCandidates.length>0) resultsArr[9]=srCandidates[Math.floor(Math.random()*srCandidates.length)];
-    }
-    const container=document.getElementById('results');
-    container.innerHTML='';
-    resultsArr.forEach((card,idx)=>{
-      history.push(card);
-      const isSpecial=['SSR','UR'].includes(card.rarity);
-      const el=createCardElement(card,null,isSpecial);
-      container.appendChild(el);
-      setTimeout(()=>{ if(!isSpecial) el.classList.add('flip'); }, FLIP_DELAY*idx);
-    });
-    updateDrawCount();
-  }
-
-  document.getElementById('btnRates').addEventListener('click', ()=> openModal('rateModal'));
-  document.getElementById('btnHistory').addEventListener('click', showHistoryModal);
-  document.getElementById('btnClearHistory').addEventListener('click', ()=>{
-    if(!confirm("確定要清空抽卡紀錄嗎？此操作無法復原。")) return;
-    history=[];
-    document.getElementById('history').innerHTML='';
-    updateDrawCount();
+  signatureCanvas.addEventListener("pointerup", (e) => {
+    if (!drawing) return;
+    drawing = false;
+    try { signatureCanvas.releasePointerCapture && signatureCanvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    signatureModal.style.display = "none";
+    clearCanvas();
+    if (pendingDrawCount > 0) { performDraw(pendingDrawCount); pendingDrawCount = 0; }
+    e.preventDefault();
   });
 
-  updateDrawCount();
-  updateRateModal();
+  signatureCanvas.addEventListener("pointercancel", (e) => { drawing = false; try { signatureCanvas.releasePointerCapture && signatureCanvas.releasePointerCapture(e.pointerId); } catch {} });
 
-});
+  function clearCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  // -------- Buttons that open signature --------
+  btnSingle.addEventListener("click", () => { pendingDrawCount = 1; signatureModal.style.display = "flex"; setTimeout(resizeCanvas, 50); });
+  btnMulti.addEventListener("click", () => { pendingDrawCount = 10; signatureModal.style.display = "flex"; setTimeout(resizeCanvas, 50); });
+
+  // -------- Draw logic --------
+  function getRandomCardFromPool() {
+    if (!Array.isArray(pool) || pool.length === 0) return { name: "空卡", rarity: "N", attack: 0, hp: 0, effect: "", image: "" };
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool[idx];
+  }
+
+  function performDraw(count) {
+    resultsDiv.innerHTML = "";
+    for (let i = 0; i < count; i++) {
+      const card = getRandomCardFromPool();
+      drawHistory.push(card);
+      drawCount++;
+      drawCountDiv.textContent = `目前第 ${drawCount} 抽`;
+
+      const cardDiv = document.createElement("div");
+      cardDiv.className = "card";
+      if (card.rarity === "SSR") cardDiv.classList.add("highlight", "SSR");
+      if (card.rarity === "UR") cardDiv.classList.add("highlight", "UR");
+
+      cardDiv.innerHTML = `
+        <div class="card-inner flip">
+          <div class="card-front">
+            <div class="name">${escapeHtml(card.name)}</div>
+            <div class="rarity rarity-${escapeHtml(card.rarity)}">${escapeHtml(card.rarity)}</div>
+            <div class="image">${escapeHtml(card.image)}</div>
+            <div class="effect">${escapeHtml(card.effect)}</div>
+            <div class="stats">ATK:${escapeHtml(String(card.attack))} HP:${escapeHtml(String(card.hp))}</div>
+          </div>
+          <div class="card-back">卡背</div>
+        </div>
+      `;
+      resultsDiv.appendChild(cardDiv);
+      initCardInteraction(cardDiv);
+      setTimeout(() => { cardDiv.classList.add("flip"); }, 120 + i * 80);
+    }
+    updateHistory();
+  }
+
+  function updateHistory() {
+  historyDiv.innerHTML = "";
+  drawHistory.forEach((card, index) => {
+    const d = document.createElement("div");
+    d.className = "card flip"; // <- 加上 flip 預設正面
+    if (card.rarity === "SSR") d.classList.add("highlight", "SSR");
+    if (card.rarity === "UR") d.classList.add("highlight", "UR");
+
+    d.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="name">${escapeHtml(card.name)}</div>
+          <div class="rarity rarity-${escapeHtml(card.rarity)}">${escapeHtml(card.rarity)}</div>
+          <div class="image">${escapeHtml(card.image)}</div>
+          <div class="effect">${escapeHtml(card.effect)}</div>
+          <div class="stats">ATK:${escapeHtml(String(card.attack))} HP:${escapeHtml(String(card.hp))}</div>
+          <div class="draw-number">第 ${index + 1} 抽</div>
+        </div>
+        <div class="card-back">卡背</div>
+      </div>
+    `;
+
+    historyDiv.appendChild(d);
+    initCardInteraction(d);
+  });
+}
+
+
+
+
+
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function initCardInteraction(cardDiv) {
+    const inner = cardDiv.querySelector(".card-inner");
+    if (!inner) return;
+
+    cardDiv.dataset.offsetX = "0"; cardDiv.dataset.offsetY = "0";
+    let clickTimer = null;
+    const CLICK_DELAY = 250;
+
+    function toggleZoom() {
+      const zoomed = cardDiv.classList.contains("zoom");
+      if (!zoomed) {
+        cardDiv.classList.add("zoom");
+        cardDiv.style.position = "fixed";
+        cardDiv.style.left = "50%"; cardDiv.style.top = "50%";
+        cardDiv.dataset.offsetX = "0"; cardDiv.dataset.offsetY = "0";
+        cardDiv.style.transform = `translate(-50%, -50%) scale(1.5)`; // 固定放大 1.5 倍
+        cardDiv.style.zIndex = 9999; cardDiv.style.cursor = "grab";
+      } else {
+        cardDiv.classList.remove("zoom");
+        cardDiv.style.position = ""; cardDiv.style.left = ""; cardDiv.style.top = "";
+        cardDiv.style.transform = ""; cardDiv.style.zIndex = ""; cardDiv.style.cursor = "";
+        cardDiv.dataset.offsetX = "0"; cardDiv.dataset.offsetY = "0";
+      }
+    }
+
+    cardDiv.addEventListener("click", (e) => {
+      if (clickTimer == null) {
+        clickTimer = setTimeout(() => { cardDiv.classList.toggle("flip"); clickTimer = null; }, CLICK_DELAY);
+      } else { clearTimeout(clickTimer); clickTimer = null; toggleZoom(); }
+    });
+
+    let dragging = false, startX=0, startY=0, baseX=0, baseY=0;
+
+    function onPointerDown(e) {
+      if (!cardDiv.classList.contains("zoom")) return;
+      dragging = true; startX=e.clientX; startY=e.clientY;
+      baseX=parseFloat(cardDiv.dataset.offsetX)||0; baseY=parseFloat(cardDiv.dataset.offsetY)||0;
+      cardDiv.setPointerCapture && cardDiv.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    }
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const dx=e.clientX-startX, dy=e.clientY-startY;
+      const newX=baseX+dx, newY=baseY+dy;
+      cardDiv.dataset.offsetX=newX; cardDiv.dataset.offsetY=newY;
+      cardDiv.style.transform = `translate(calc(-50% + ${newX}px), calc(-50% + ${newY}px)) scale(1.5)`; // 拖曳 transform
+      e.preventDefault();
+    }
+    function onPointerUp(e) { if(!dragging) return; dragging=false; try{cardDiv.releasePointerCapture&&cardDiv.releasePointerCapture(e.pointerId);}catch{} }
+
+    cardDiv.addEventListener("pointerdown", onPointerDown, { passive:false });
+    cardDiv.addEventListener("pointermove", onPointerMove, { passive:false });
+    cardDiv.addEventListener("pointerup", onPointerUp);
+    cardDiv.addEventListener("pointercancel", onPointerUp);
+  }
+
+  // -------- rate/history/clear controls --------
+  btnRates.addEventListener("click", () => {
+    const ul = rateModal.querySelector("ul"); if (!ul) return;
+    ul.innerHTML = `
+      <li>N: ${typeof N_CARDS!=="undefined"?N_CARDS.length:0}</li>
+      <li>R: ${typeof R_CARDS!=="undefined"?R_CARDS.length:0}</li>
+      <li>SR: ${typeof SR_CARDS!=="undefined"?SR_CARDS.length:0}</li>
+      <li>SSR: ${typeof SSR_CARDS!=="undefined"?SSR_CARDS.length:0}</li>
+      <li>UR: ${typeof UR_CARDS!=="undefined"?UR_CARDS.length:0}</li>
+    `;
+    rateModal.style.display = "flex";
+  });
+
+  btnHistory.addEventListener("click", () => { updateHistory(); historyModal.style.display = "flex"; });
+
+  btnClearHistory.addEventListener("click", () => {
+    drawHistory=[]; updateHistory(); resultsDiv.innerHTML="";
+    drawCount=0; drawCountDiv.textContent=`目前第 ${drawCount} 抽`;
+  });
+
+  document.querySelectorAll(".modal .close-btn").forEach(btn => {
+    btn.addEventListener("click",(e)=>{ const modal=e.target.closest(".modal"); if(modal) modal.style.display="none"; });
+  });
+
+}); // end DOMContentLoaded
